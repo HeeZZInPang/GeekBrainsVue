@@ -2,16 +2,24 @@
   <div class="hello">
     <h1>{{ result }}</h1> 
 
-    <input type="text" v-model.trim.number="operand1"/>
-    <input type="text" v-model.trim.number="operand2" @keyup="changeDisabled"/>
-
+    <div class="display">
+      <input v-model.number="operand1" />
+      <input v-model.number="operand2" />
+    </div>
     <hr/>
-    <button @click="result = operand1 + operand2">+</button>
-    <button @click="result = operand1 - operand2">-</button>
-    <button @click="divide" :disabled="disabled">/</button>
-    <button @click="multiply(operand1, operand2)">*</button>
-    <button @click="exponentiation">^</button>
-    <button @click="devideInt" :disabled="disabled">\</button>
+    <button v-for="(operand, idx) in operands" @click="calculate(operand)" :key="idx">{{ operand }}</button>
+    <hr/>
+    <input type="checkbox" id="checkbox" v-model="checked">
+    <label for="checkbox">Отобразить экранную клавиатуру</label>
+    <br>
+    <div v-if="checked">
+      <button v-for="(button, idx) in buttons" @click="display(button)" :key="idx">{{ button }}</button>
+      <br>
+      <input type="radio" id="one" value="1" v-model="picked">
+      <label for="one">Операнд 1</label>
+      <input type="radio" id="two" value="2" v-model="picked">
+      <label for="two">Операнд 2</label>
+    </div>
   </div>
 </template>
 
@@ -23,28 +31,87 @@ export default {
   },
   data() {
     return {
-      disabled: false,
       operand1: 0,
       operand2: 0,
       result: 0,
+      error: '',
+      operands: ['+', '-', '*', '/', '^', '%'],
+      checked: false,
+      buttons: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '←'],
+      picked: '1',
+      fibResult: 0,
     }
   },
   methods: {
+    calculate(operation="+") {
+      this.error = "";
+      switch (operation) {
+        case "+":
+          this.add();
+          break;
+        case "-":
+          this.substract();
+          break;
+        case "*":
+          this.multiply();
+          break;
+        case "/":
+          this.divide();
+          break;
+        case "^":
+          this.exponentiation();
+          break;
+        case "%":
+          this.devideInt();
+          break;
+      }
+    },
+    add() {
+      this.result = this.operand1 + this.operand2;
+      this.fibResult = this.fibb1 + this.fibb2;
+    },
+    substract() {
+      this.result = this.operand1 - this.operand2;
+      this.fibResult = this.fibb1 - this.fibb2;
+    },
     divide() {
+      if ( this.operand2 === 0 ) {
+        this.error = "На 0 делить нельзя";
+        return;
+      }
       this.result = this.operand1 / this.operand2;
     },
-    multiply(op1, op2) {
-      this.result = op1 * op2;
+    multiply() {
+      this.result = this.operand1 * this.operand2;
     },
     exponentiation() {
        this.result = this.operand1 ** this.operand2;
     },
     devideInt() {
+      if ( this.operand2 === 0 ) {
+        this.error = "На 0 делить нельзя";
+        return;
+      }
       this.result = Math.floor(this.operand1 / this.operand2);
-    },
-    changeDisabled() {
-      if(this.operand2 === 0) {
-        this.disabled = true;
+    }, 
+    display(button) {
+      switch(this.picked) {
+        case "1":
+          if (button === "←") {
+            this.operand1 = Math.floor(this.operand1 / 10);
+          }
+          else {
+            this.operand1 += button;
+          }
+          break;
+        case "2":
+          if (button === "←") {
+            this.operand2 = Math.floor(this.operand2 / 10);
+          }
+          else {
+            this.operand2 += button;
+          }
+          break;
       }
     }
   },
